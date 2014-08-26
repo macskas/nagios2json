@@ -135,5 +135,6 @@ Later I started using this at the company I am working for. We are using it with
 
 Screenshots
 -----------
+You can see it integrated in a simple nagios application
 ![Screenshot1](https://raw.githubusercontent.com/macskas/nagios2json/master/github-static/nagios1.png "Screenshot1")
 ![Screenshot2](https://raw.githubusercontent.com/macskas/nagios2json/master/github-static/nagios2.png "Screenshot2")
