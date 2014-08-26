@@ -59,68 +59,74 @@ Example
 Options
 -----------
 ## Console arguments (optional)
+<pre>
   -s, --status=[FILE]          nagios status.dat path
   -c, --cgi                    cgi mode
   -j, --json                   json output
   -t, --servicestatustypes     service status type (OK/CRIT/WARN)
   -p, --serviceprops           service props (ACK/MAINTENANCE)
   -n, --hostprops              host props (ACK/MAINTENANCE)
+</pre>
 
 ## parameter details (http GET / console)
- hostprops:
-        #define HOST_SCHEDULED_DOWNTIME                 1
-        #define HOST_NO_SCHEDULED_DOWNTIME              (1<<1)
-        #define HOST_STATE_ACKNOWLEDGED                 (1<<2)
-        #define HOST_STATE_UNACKNOWLEDGED               (1<<3)
-        #define HOST_CHECKS_DISABLED                    (1<<4)
-        #define HOST_CHECKS_ENABLED                             (1<<5)
-        #define HOST_EVENT_HANDLER_DISABLED             (1<<6)
-        #define HOST_EVENT_HANDLER_ENABLED              (1<<7)
-        #define HOST_FLAP_DETECTION_DISABLED    (1<<8)
-        #define HOST_FLAP_DETECTION_ENABLED             (1<<9)
-        #define HOST_IS_FLAPPING                                (1<<10)
-        #define HOST_IS_NOT_FLAPPING                    (1<<11)
-        #define HOST_NOTIFICATIONS_DISABLED             (1<<12)
-        #define HOST_NOTIFICATIONS_ENABLED              (1<<13)
-        #define HOST_PASSIVE_CHECKS_DISABLED    (1<<14)
-        #define HOST_PASSIVE_CHECKS_ENABLED             (1<<15)
-        #define HOST_PASSIVE_CHECK                              (1<<16)
-        #define HOST_ACTIVE_CHECK                               (1<<17)
-        #define HOST_HARD_STATE                                 (1<<18)
-        #define HOST_SOFT_STATE                                 (1<<19)
-        #define HOST_ACTIVE_CHECKS_DISABLED             (1<<20)
-        #define HOST_ACTIVE_CHECKS_ENABLED              (1<<21)
+<pre>
 
-  serviceprops:
-        #define SERVICE_SCHEDULED_DOWNTIME              1
-        #define SERVICE_NO_SCHEDULED_DOWNTIME   (1<<1)
-        #define SERVICE_STATE_ACKNOWLEDGED              (1<<2)
-        #define SERVICE_STATE_UNACKNOWLEDGED    (1<<3)
-        #define SERVICE_CHECKS_DISABLED                 (1<<4)
-        #define SERVICE_CHECKS_ENABLED                  (1<<5)
-        #define SERVICE_EVENT_HANDLER_DISABLED  (1<<6)
-        #define SERVICE_EVENT_HANDLER_ENABLED   (1<<7)
-        #define SERVICE_FLAP_DETECTION_ENABLED  (1<<8)
-        #define SERVICE_FLAP_DETECTION_DISABLED (1<<9)
-        #define SERVICE_IS_FLAPPING                             (1<<10)
-        #define SERVICE_IS_NOT_FLAPPING                 (1<<11)
-        #define SERVICE_NOTIFICATIONS_DISABLED  (1<<12)
-        #define SERVICE_NOTIFICATIONS_ENABLED   (1<<13)
-        #define SERVICE_PASSIVE_CHECKS_DISABLED (1<<14)
-        #define SERVICE_PASSIVE_CHECKS_ENABLED  (1<<15)
-        #define SERVICE_PASSIVE_CHECK                   (1<<16)
-        #define SERVICE_ACTIVE_CHECK                    (1<<17)
-        #define SERVICE_HARD_STATE                              (1<<18)
-        #define SERVICE_SOFT_STATE                              (1<<19)
-        #define SERVICE_ACTIVE_CHECKS_DISABLED  (1<<20)
-        #define SERVICE_ACTIVE_CHECKS_ENABLED   (1<<21)
+hostprops:
+HOST_SCHEDULED_DOWNTIME                  1
+HOST_NO_SCHEDULED_DOWNTIME               2
+HOST_STATE_ACKNOWLEDGED                  4
+HOST_STATE_UNACKNOWLEDGED                8
+HOST_CHECKS_DISABLED                     16
+HOST_CHECKS_ENABLED                      32
+HOST_EVENT_HANDLER_DISABLED              64
+HOST_EVENT_HANDLER_ENABLED               128
+HOST_FLAP_DETECTION_DISABLED             256
+HOST_FLAP_DETECTION_ENABLED              512
+HOST_IS_FLAPPING                         1024
+HOST_IS_NOT_FLAPPING                     2048
+HOST_NOTIFICATIONS_DISABLED              4096
+HOST_NOTIFICATIONS_ENABLED               8192
+HOST_PASSIVE_CHECKS_DISABLED             16384
+HOST_PASSIVE_CHECKS_ENABLED              32768
+HOST_PASSIVE_CHECK                       65536
+HOST_ACTIVE_CHECK                        131072
+HOST_HARD_STATE                          262144
+HOST_SOFT_STATE                          524288
+HOST_ACTIVE_CHECKS_DISABLED              1048576
+HOST_ACTIVE_CHECKS_ENABLED               2097152
 
- servicestatustypes:
-        #define SERVICE_PENDING                                 1
-        #define SERVICE_OK                                              2
-        #define SERVICE_WARNING                                 4
-        #define SERVICE_UNKNOWN                                 8
-        #define SERVICE_CRITICAL                                16
+serviceprops:
+SERVICE_SCHEDULED_DOWNTIME               1
+SERVICE_NO_SCHEDULED_DOWNTIME            2
+SERVICE_STATE_ACKNOWLEDGED               4
+SERVICE_STATE_UNACKNOWLEDGED             8
+SERVICE_CHECKS_DISABLED                  16
+SERVICE_CHECKS_ENABLED                   32
+SERVICE_EVENT_HANDLER_DISABLED           64
+SERVICE_EVENT_HANDLER_ENABLED            128
+SERVICE_FLAP_DETECTION_ENABLED           256
+SERVICE_FLAP_DETECTION_DISABLED          512
+SERVICE_IS_FLAPPING                      1024
+SERVICE_IS_NOT_FLAPPING                  2048
+SERVICE_NOTIFICATIONS_DISABLED           4096
+SERVICE_NOTIFICATIONS_ENABLED            8192
+SERVICE_PASSIVE_CHECKS_DISABLED          16384
+SERVICE_PASSIVE_CHECKS_ENABLED           32768
+SERVICE_PASSIVE_CHECK                    65536
+SERVICE_ACTIVE_CHECK                     131072
+SERVICE_HARD_STATE                       262144
+SERVICE_SOFT_STATE                       524288
+SERVICE_ACTIVE_CHECKS_DISABLED           1048576
+SERVICE_ACTIVE_CHECKS_ENABLED            2097152
+
+servicestatustypes:
+SERVICE_PENDING                          1
+SERVICE_OK                               2
+SERVICE_WARNING                          4
+SERVICE_UNKNOWN                          8
+SERVICE_CRITICAL                         16
+
+</pre>
 
 History
 -----------
