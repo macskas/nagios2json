@@ -3,7 +3,7 @@ nagios2json
 
 Description
 -----------
-Nagios Status to JSON/Console.
+Nagios Status to JSON/JSONP/Console.
 
 - Everything should be automatic. It tries to find the nagios configuration and locate the status.dat and parse it.
   If something is wrong or you are using exotic nagios configuration, you can set the statusdat as a parameter.
@@ -55,7 +55,8 @@ Example
 	    }
 	]
     }
-
+    
+    You can you &callback=FNNAME for JSONP
 Options
 -----------
 ## Console arguments (optional)
