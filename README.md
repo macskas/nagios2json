@@ -8,7 +8,7 @@ Nagios Status to JSON/JSONP/Console.
 - Everything should be automatic. It tries to find the nagios configuration and locate the status.dat and parse it.
   If something is wrong or you are using exotic nagios configuration, you can set the statusdat as a parameter.
 - It works on Linux and BSD also.
-- The parser is much faster then the built-in nagios parser. (Using the nagios cgi scripts the parsing takes 3+ seconds. With this It takes ~0.1s)
+- The parser is much faster than the built-in nagios parser. (Using the nagios cgi scripts the parsing takes 3+ seconds. With this It takes ~0.1s)
 
 Why?
 -----------
