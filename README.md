@@ -56,7 +56,7 @@ Example
 	]
     }
     
-    You can you &callback=FNNAME for JSONP
+    You can add &callback=FNNAME for JSONP
 Options
 -----------
 ## Console arguments (optional)
