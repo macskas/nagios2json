@@ -5,7 +5,7 @@
 
 config* config::getInstance()
 {
-	if (pinstance == NULL)
+	if (pinstance == nullptr)
 		pinstance = new config();
 	return pinstance;
 }
@@ -20,20 +20,20 @@ config::~config()
 
 }
 
-bool config::set(std::string k, std::string v)
+bool config::set(const std::string& k, std::string v)
 {
 	this->config_str[k] = v; //.insert( config_str_t::value_type(std::string(k), std::string(v)) );
 	return true;
 }
 
-bool config::setInt(std::string k, int v)
+bool config::setInt(const std::string& k, int v)
 {
 	this->config_int[k] = v; //.insert( config_int_t::value_type(k, v) );
 	return true;
 }
 
 
-bool config::get(std::string k, std::string *t)
+bool config::get(const std::string& k, std::string *t)
 {
 	t->clear();
 	config_str_t::iterator it;
@@ -45,7 +45,7 @@ bool config::get(std::string k, std::string *t)
 	return false;
 }
 
-bool config::getInt(std::string k, int *t)
+bool config::getInt(const std::string& k, int *t)
 {
 	config_int_t::iterator it;
 	it = this->config_int.find( k );
@@ -56,7 +56,7 @@ bool config::getInt(std::string k, int *t)
 	return false;
 }
 
-std::string config::get(std::string k, std::string def)
+std::string config::get(const std::string& k, std::string def)
 {
 	config_str_t::iterator it;
 	it = this->config_str.find( k );
@@ -66,7 +66,7 @@ std::string config::get(std::string k, std::string def)
 	return def;
 }
 
-int config::getInt(std::string k, int def)
+int config::getInt(const std::string& k, int def)
 {
 	config_int_t::iterator it;
 	it = this->config_int.find( k );
