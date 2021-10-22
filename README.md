@@ -1,6 +1,8 @@
 nagios2json
 ===========
 
+![build](https://github.com/macskas/nagios2json/actions/workflows/c-cpp.yml/badge.svg)
+
 Description
 -----------
 Nagios Status to JSON/JSONP/Console.
