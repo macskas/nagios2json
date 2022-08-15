@@ -6,6 +6,7 @@
 #include <cctype>
 #include <sstream>
 #include <cstdlib>
+#include <set>
 
 extern "C" {
 #include <signal.h>
@@ -86,7 +87,7 @@ NagiosParser::NagiosParser(const std::string& filepath)
     if (!filestr.is_open())
     {
         std::cerr << "Error: statusfile error (" << filepath << ")." << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     filestr.seekg(0, std::ios::end);
     length = (int)filestr.tellg();
@@ -131,8 +132,11 @@ void NagiosParser::parse()
     std::string			hostname, servicename;
     struct				stat st;
     bool				check_inner = false;
-    char				filenamebuffer[512];
-    memset(filenamebuffer,0,512);
+    char				filenamebuffer[FILENAME_MAX];
+    std::string         include_fields_raw;
+    std::set<std::string> include_fields;
+    memset(filenamebuffer,0,FILENAME_MAX);
+    memset(&st, 0, sizeof(struct stat));
 
     this->reset_service(&servicedata);
     this->reset_host(&hostdata);
@@ -140,6 +144,28 @@ void NagiosParser::parse()
     this->reset_comment(&nagios_comment);
 
     char *buffer_newline = nullptr;
+
+    // will run only once, performance does not matter we can use std::string find
+    include_fields_raw = config::getInstance()->get("include-fields", "");
+    if (!include_fields_raw.empty()) {
+        size_t if_start = 0;
+        size_t if_offset = 0;
+        while (true) {
+            if_offset = include_fields_raw.find(',', if_offset);
+            if (if_offset == std::string::npos) {
+                if (if_start != include_fields_raw.length()) {
+                    include_fields.insert(include_fields_raw.substr(if_start));
+                }
+                break;
+            }
+            if (if_offset-if_start > 0) {
+                include_fields.insert(include_fields_raw.substr(if_start, if_offset - if_start));
+            }
+            if_offset++;
+            if_start = if_offset;
+        }
+    }
+    const auto include_fields_end = include_fields.end();
 
     while (1)
     {
@@ -321,6 +347,8 @@ void NagiosParser::parse()
                         hostdata.current_attempt = strtoull(buffer_value, nullptr, 10);
                     } else if (key_length == 9 && strncmp(buffer_key, "host_name", 9) == 0) {
                         hostdata.hostname = buffer_value;
+                    } else if (key_length > 0 && !include_fields.empty() && include_fields.find(buffer_key) != include_fields_end) {
+                        hostdata.extra[buffer_key] = buffer_value;
                     }
                     break;
                 case C_SERVICESTATUS:
@@ -407,6 +435,8 @@ void NagiosParser::parse()
                         servicedata.servicename = buffer_value;
                     } else if (key_length == 9 && strncmp(buffer_key, "host_name", 9) == 0) {
                         servicedata.hostname = buffer_value;
+                    } else if (key_length > 0 && !include_fields.empty() && include_fields.find(buffer_key) != include_fields_end) {
+                        servicedata.extra[buffer_key] = buffer_value;
                     }
                     break;
                 case C_INFO:
@@ -421,7 +451,7 @@ void NagiosParser::parse()
                         if (nagiospid > 0) {
                             rc = kill(nagiospid, 0);
                             if (rc != 0) {
-                                snprintf(filenamebuffer,512,"/proc/%d",nagiospid);
+                                snprintf(filenamebuffer,FILENAME_MAX,"/proc/%d",nagiospid);
                                 if (stat(filenamebuffer, &st) == 0)
                                     this->is_nagios_running = true;
                             } else {
@@ -619,14 +649,11 @@ void NagiosParser::do_cgi()
 
 void NagiosParser::do_json()
 {
-    // old buffer size: 4096, new buffer size: 412(json encap size atm) + 256(max-host-address) + 128(max service length) + 4096(max-plugin-output) = 4892 rounded to 5120
-    char						*buffer = (char*)calloc(5120, sizeof(char));
+    std::stringstream           outjson;
     uint32_t					pversion	= config::getInstance()->getInt("version", 0);
     nagios_service_t			*scurr		= nullptr;
     std::vector<std::string>	jsonlist;
     std::string					callback_function_name = config::getInstance()->get("callback", "");
-    size_t						vecsize		= 0,
-            i			= 0;
     std::string					statusbuffer("-");
     std::string					diffbuffer("-");
     struct tm					*ltime;
@@ -648,50 +675,41 @@ void NagiosParser::do_json()
               << "\"created\":" << this->created << ","
               << "\"data\":[";
 
-    for (nagiosmap_service_t::iterator it_c=this->services.begin(), it_e=this->services.end(); it_c != it_e; ++it_c)
-    {
+    for (auto it_c=this->services.begin(), it_e=this->services.end(); it_c != it_e; ++it_c) {
         scurr = &(it_c->second);
         format_status_service(&scurr->status, &statusbuffer);
         format_date(&scurr->last_state_diff, &diffbuffer);
-        snprintf(buffer, 5120,
-                 "{"
-                 "\"last_state_change\":%lu,"
-                 "\"plugin_output\":\"%s\","
-                 "\"status\":\"%s\","
-                 "\"flags\":%u,"
-                 "\"hostname\":\"%s\","
-                 "\"service\":\"%s\","
-                 "\"host_alive\":%d,"
-                 "\"services_total\":%d,"
-                 "\"services_visible\":%d,"
-                 "\"duration\":\"%s\""
-                 "}",
-                 scurr->last_state_change,
-                 escapeJsonString(scurr->output).c_str(),
-                 statusbuffer.c_str(),
-                 scurr->flags,
-                 escapeJsonString(scurr->hostname).c_str(),
-                 escapeJsonString(scurr->servicename).c_str(),
-                 ((scurr->hostdata != nullptr && (scurr->hostdata->status & HOST_UP) != 0)  ? 1 : 0),
-                 (scurr->hostdata != nullptr ? scurr->hostdata->services : 0),
-                 (scurr->hostdata != nullptr ? scurr->hostdata->services_visible : 0),
-                 diffbuffer.c_str()
-        );
-        jsonlist.push_back(buffer);
-    }
-    vecsize = jsonlist.size();
-    for (i=0; i<vecsize; i++)
-    {
-        if (i==0)
-            std::cout << jsonlist[i];
-        else
-            std::cout << "," << jsonlist[i];
+        if (it_c != this->services.begin()) {
+            std::cout << ",";
+        }
+        std::cout
+                << "{"
+                << "\"last_state_change\":" << scurr->last_state_change << ","
+                << R"("plugin_output":")" << escapeJsonString(scurr->output) << "\","
+                << R"("status":")" << statusbuffer << "\","
+                << R"("flags":)" << scurr->flags << ","
+                << R"("hostname":")" << escapeJsonString(scurr->hostname) << "\","
+                << R"("service":")" << escapeJsonString(scurr->servicename) << "\","
+                << R"("host_alive":)" <<  ((scurr->hostdata != nullptr && (scurr->hostdata->status & HOST_UP) != 0)  ? 1 : 0) << ","
+                << R"("services_total":)" << (scurr->hostdata != nullptr ? scurr->hostdata->services : 0) << ","
+                << R"("services_visible":)" << (scurr->hostdata != nullptr ? scurr->hostdata->services_visible : 0) << ","
+                << R"("duration":")" << diffbuffer << "\"";
+        if (!scurr->extra.empty()) {
+            const auto ite_b =  scurr->extra.begin();
+            std::cout << ",";
+            for (auto ite_c = ite_b, ite_e = scurr->extra.end(); ite_c != ite_e; ite_c++) {
+                if (ite_c != ite_b) {
+                    std::cout << ",";
+                }
+                std::cout << "\"" << escapeJsonString(ite_c->first) << "\":\"" << escapeJsonString(ite_c->second) << "\"";
+            }
+        }
+        std::cout << "}";
     }
     std::cout << "]}";
     if (callback_function_name.length() > 0) {
         std::cout << ")";
     }
-    free(buffer);
 }
 
 void NagiosParser::filter()
@@ -705,8 +723,8 @@ void NagiosParser::filter()
     std::string						diffbuffer("-");
     nagios_service_t				*scurr				= nullptr;
     nagios_host_t					*hcurr				= nullptr;
-    nagiosmap_service_t::iterator	it_current			= this->services.begin();
-    nagiosmap_service_t::iterator	it_end				= this->services.end();
+    auto	    it_current			= this->services.begin();
+    auto	    it_end				= this->services.end();
     nagiosmap_service_t::iterator	it_temp;
     while (it_current != it_end)
     {
@@ -740,7 +758,7 @@ void NagiosParser::do_plaintext()
     std::string statusbuffer("-");
     std::string diffbuffer("-");
     nagios_service_t *scurr = nullptr;
-    for (nagiosmap_service_t::iterator it_c=this->services.begin(), it_e=this->services.end(); it_c != it_e; ++it_c)
+    for (auto it_c=this->services.begin(), it_e=this->services.end(); it_c != it_e; ++it_c)
     {
         scurr = &(it_c->second);
         format_status_service(&scurr->status, &statusbuffer);

@@ -108,6 +108,7 @@ typedef struct {
 	commentlist_t		comments;
 	uint32_t			services;
 	uint32_t			services_visible;
+    std::map<std::string, std::string> extra;
 } nagios_host_t;
 
 typedef struct {
@@ -123,6 +124,7 @@ typedef struct {
 	nagios_downtime_t	downtime;
 	commentlist_t		comments;
 	nagios_host_t		*hostdata;
+    std::map<std::string, std::string> extra;
 } nagios_service_t;
 
 typedef std::map<std::string, nagios_host_t>		nagiosmap_host_t;

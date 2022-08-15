@@ -138,6 +138,12 @@ static void cgi_parse(char *d)
             if (len_helper > 0 && len_helper < 100)
                 config::getInstance()->set("callback", eq_helper);
         }
+        else if (strncmp("include-fields", ret, len) == 0) {
+            len_helper = (int)strlen(eq_helper);
+            if (len_helper > 0) {
+                config::getInstance()->set("include-fields", eq_helper);
+            }
+        }
     }
 }
 
@@ -154,6 +160,7 @@ void do_help(char *pname)
     std::cout << "  -t, --servicestatustypes     service status type (OK/CRIT/WARN)" << std::endl;
     std::cout << "  -p, --serviceprops           service props (ACK/MAINTENANCE)" << std::endl;
     std::cout << "  -n, --hostprops              host props (ACK/MAINTENANCE)" << std::endl;
+    std::cout << "  -i, --include-fields         status.dat fields, separated by: ','" << std::endl;
     std::cout << std::endl;
     std::cout << "Report bugs to macskas @bh" << std::endl;
 }
@@ -173,6 +180,7 @@ int main(int argc, char **argv)
                     {"servicestatustypes",	required_argument,		0,				't'},
                     {"serviceprops",		required_argument,		0,				'p'},
                     {"hostprops",			required_argument,		0,				'n'},
+                    {"include-fields",	    required_argument,		0,				'i'},
                     {nullptr, 0, nullptr, 0}
             };
 
@@ -181,7 +189,7 @@ int main(int argc, char **argv)
     config::getInstance()->setInt("hostprops",			0);
     config::getInstance()->setInt("version",			20110619);
 
-    while ((c = getopt_long(argc, argv, "hs:dcjt:p:n:", long_options, &option_index)) != -1)
+    while ((c = getopt_long(argc, argv, "hs:dcjt:p:n:i:", long_options, &option_index)) != -1)
     {
         switch (c)
         {
@@ -230,6 +238,11 @@ int main(int argc, char **argv)
                     config::getInstance()->setInt("hostprops", atoi(optarg));
                 } else {
                     optfail = 1;
+                }
+                break;
+            case 'i':
+                if (optarg != nullptr) {
+                    config::getInstance()->set("include-fields", optarg);
                 }
                 break;
             default:
